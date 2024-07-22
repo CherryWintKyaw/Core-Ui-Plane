@@ -1,5 +1,5 @@
-import React from 'react'
-import { Link } from 'react-router-dom'
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import {
   CButton,
   CCard,
@@ -12,11 +12,45 @@ import {
   CInputGroup,
   CInputGroupText,
   CRow,
-} from '@coreui/react'
-import CIcon from '@coreui/icons-react'
-import { cilLockLocked, cilUser } from '@coreui/icons'
+} from '@coreui/react';
+import CIcon from '@coreui/icons-react';
+import { cilLockLocked, cilUser } from '@coreui/icons';
+import { ENDPOINTS } from '../../../api/api';  // Ensure you import the endpoints
 
 const Login = () => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [errors, setErrors] = useState({});
+  const navigate = useNavigate();
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setErrors({});
+
+    try {
+      const response = await fetch(ENDPOINTS.LOGIN, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        // Handle successful login, e.g., store tokens, redirect, etc.
+        console.log('Login successful:', data);
+        navigate('/dashboard'); // Redirect to dashboard or another page
+      } else {
+        const errorData = await response.json();
+        setErrors(errorData);
+      }
+    } catch (error) {
+      console.error('Error during login:', error);
+      setErrors({ general: 'An error occurred. Please try again.' });
+    }
+  };
+
   return (
     <div className="bg-body-tertiary min-vh-100 d-flex flex-row align-items-center">
       <CContainer>
@@ -25,14 +59,22 @@ const Login = () => {
             <CCardGroup>
               <CCard className="p-4">
                 <CCardBody>
-                  <CForm>
+                  <CForm onSubmit={handleLogin}>
                     <h1>Login</h1>
                     <p className="text-body-secondary">Sign In to your account</p>
+                    {errors.general && <p className="text-danger">{errors.general}</p>}
                     <CInputGroup className="mb-3">
                       <CInputGroupText>
                         <CIcon icon={cilUser} />
                       </CInputGroupText>
-                      <CFormInput placeholder="Username" autoComplete="username" />
+                      <CFormInput
+                        type="email"
+                        placeholder="Email"
+                        autoComplete="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                      />
+                      {errors.email && <p className="text-danger">{errors.email}</p>}
                     </CInputGroup>
                     <CInputGroup className="mb-4">
                       <CInputGroupText>
@@ -42,11 +84,14 @@ const Login = () => {
                         type="password"
                         placeholder="Password"
                         autoComplete="current-password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
                       />
+                      {errors.password && <p className="text-danger">{errors.password}</p>}
                     </CInputGroup>
                     <CRow>
                       <CCol xs={6}>
-                        <CButton color="primary" className="px-4">
+                        <CButton type="submit" color="primary" className="px-4">
                           Login
                         </CButton>
                       </CCol>
@@ -80,7 +125,7 @@ const Login = () => {
         </CRow>
       </CContainer>
     </div>
-  )
-}
+  );
+};
 
-export default Login
+export default Login;

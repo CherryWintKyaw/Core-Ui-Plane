@@ -79,6 +79,24 @@ const _nav = [
       },
     ],
   },
+
+  {
+    component: CNavTitle,
+    name: 'Users',
+  },
+  {
+    component: CNavGroup,
+    name: 'Users',
+    icon: <CIcon icon={cilNotes} customClassName="nav-icon" />,
+    items: [
+      {
+        component: CNavItem,
+        name: 'User List',
+        to: '/userlist',
+      },
+    ],
+  },
+
  
   {
     component: CNavItem,
